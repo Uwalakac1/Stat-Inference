@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: inline
+---
+Given data: 19.66, 13.66, 86.54, 16.17, 6.83, 15.18, 6.37,
+19.03, 1.54, 47.52, 7.42, 8.33, 31.22, 6.00, 8.21, 6.57.
+Calculate 90% and 95% confidence intervals and interpret.
+
+```{r}
+dta=c(19.66, 13.66, 86.54, 16.17, 6.83, 15.18, 6.37,
+19.03, 1.54, 47.52, 7.42, 8.33, 31.22, 6.00, 8.21, 6.57)
+
+X <-mean(dta)
+
+n <- length(dta)
+
+N <- 10^4
+
+dta.mean<-numeric(N)
+
+for (i in 1:N)
+{
+   x <- sample(dta, n, replace = TRUE)
+   dta.mean[i] <- mean(x)
+}
+
+ 
+hist(dta.mean, main = "Bootstrap distribution of means")
+abline(v = mean(dta.mean), col = "blue", lty = 2)
+
+quantile(dta.mean,c(0.05,0.95))    # 90% interval
+
+quantile(dta.mean,c(0.025,0.975))  # 95% interval
+
+```
+
+The confidence intervals for the given data is between 10.146 and 30.163 for 95%. The interval for 95% is 11.12294 and 28.146.

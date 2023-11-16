@@ -1,0 +1,174 @@
+---
+title: "HW/Lab 5"
+output:
+  word_document: default
+  html_notebook: default
+editor_options:
+  chunk_output_type: inline
+---
+
+• Consider the Verizon data. Find a 95% CI for the ratio of
+medians. Estimate the percent bias (relative to the standard
+error) and compare with the results for the ratio of means.
+Interpret.
+
+```{r}
+library(resampledata3)
+data("Verizon")
+
+Time.ILEC <- subset(Verizon, select = Time, Group == "ILEC", drop = TRUE)
+Time.CLEC <- subset(Verizon, select = Time, Group == "CLEC", drop = TRUE)
+
+observed <- median(Time.ILEC) / median(Time.CLEC)
+
+n.ILEC <- length(Time.ILEC)
+n.CLEC <- length(Time.CLEC)
+
+N <- 10^4
+
+time.ILEC.boot <- numeric(N)
+time.CLEC.boot <- numeric(N)
+
+time.diff.median <- numeric(N)
+n <- length(Verizon)
+
+
+set.seed(100)
+for (i in 1:N)
+ {
+  ILEC.sample <- sample(Time.ILEC, n.ILEC, replace = TRUE)
+  CLEC.sample <- sample(Time.CLEC, n.CLEC, replace = TRUE)
+  time.ILEC.boot[i] <- median(ILEC.sample)
+  time.CLEC.boot[i] <- median(CLEC.sample)
+  time.diff.median[i] <- median(ILEC.sample) / median(CLEC.sample)
+}
+
+#bootstrap for ILEC
+hist(time.ILEC.boot, main = "Bootstrap distribution of ILEC medians",
+    xlab = "medians")
+abline(v = median(Time.ILEC), col = "blue")
+abline(v = median(time.ILEC.boot), col = "red", lty=2)
+
+qqnorm(time.ILEC.boot)
+qqline(time.ILEC.boot)
+
+#bootstrap for CLEC
+hist(time.CLEC.boot, main = "Bootstrap distribution of CLEC medians",
+    xlab = "medians")
+abline(v = mean(Time.CLEC), col = "blue")
+abline(v = mean(time.CLEC.boot), col = "red", lty = 2)
+
+qqnorm(time.CLEC.boot)
+qqline(time.CLEC.boot)
+
+#Different in means
+hist(time.diff.median, main = "Bootstrap distribution of difference in medians")
+abline(v = median(time.diff.median), col = "red", lty = 2)
+abline(v = observed, col = "blue")
+
+qqnorm(time.diff.median)
+qqline(time.diff.median)
+
+mean(time.diff.median)
+quantile(time.diff.median, c(0.025, 0.975))
+
+
+#Bias percentage of SE
+(mean(time.diff.median) - observed )/sd(time.diff.median)
+```
+
+Interpretaion
+We are 95% confident that the ratio of true median is between .1700 and .6414. The bias of the SE is 27%.
+
+
+
+The data set FishMercury contains mercury levels (parts per million)
+for 30 fish caught in lakes in Minnesota.
+a) Create a histogram or boxplot of the data. What do you observe?
+
+
+```{r}
+library(resampledata3)
+data("FishMercury")
+
+
+Mercury <- FishMercury$Mercury
+length(Mercury)
+#Alternatively,
+#Mercury <- subset(FishMercury, select = Mercury, drop = TRUE)
+
+hist(Mercury)
+
+
+qqnorm(Mercury)
+qqline(Mercury)
+
+n <- length(Mercury)
+
+N <- 10^4
+
+Mercury.mean<-numeric(N)
+
+for (i in 1:N)
+{
+   x <- sample(Mercury, n, replace = TRUE)
+   Mercury.mean[i] <- mean(x)
+}
+
+ 
+hist(Mercury.mean, main = "Bootstrap distribution of means")
+abline(v = mean(Mercury.mean), col = "blue", lty = 2)
+
+
+qqnorm(Mercury.mean)
+qqline(Mercury.mean)
+
+
+ 
+upper=mean(Mercury.mean) + 1.96*sd(Mercury.mean)  
+lower=mean(Mercury.mean) - 1.96*sd(Mercury.mean)  
+
+sum(Mercury.mean > upper)/N
+sum(Mercury.mean < lower)/N
+
+
+
+
+
+
+```
+
+
+B) Bootstrap the mean, and record the bootstrap standard error and the
+95% bootstrap percentile interval.
+```{r}
+mean(Mercury.mean)                 #bootstrap mean
+mean(Mercury.mean) - mean(Mercury) #bias
+sd(Mercury.mean)                   #bootstrap SE
+( mean(Mercury.mean) - mean(Mercury) )/ sd(Mercury.mean)  #bootstrap percentage of SE
+quantile(Mercury.mean, c(0.025, 0.975))
+```
+c) Remove the outlier and bootstrap the mean of the remaining data.
+Record the bootstrap standard error and the 95% bootstrap percentile
+interval.
+```{r}
+Mercury.new<-Mercury[Mercury<1]
+Mercury.new.mean<-numeric(N)
+for (i in 1:N)
+{
+   x <- sample(Mercury.new, n, replace = TRUE)
+   Mercury.new.mean[i] <- mean(x)
+}
+
+
+mean(Mercury.new.mean) - mean(Mercury.new)
+sd(Mercury.new.mean) 
+
+quantile(Mercury.new.mean, c(0.025, 0.975))
+```
+
+D) What effect did removing the outlier have on the bootstrap distribution, in particular, the standard error? 
+The bootstrap standard error got smaller when the outliers were removed, it was originally .05805068 but it became 0.007662898. Additionally it also impacted the confidence interval making it more than half smaller. The interval used to be *{0.1123992, 0.3065350}* but by removing the outlier it became *{0.1083325, 0.1384333}*. 
+
+
+

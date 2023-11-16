@@ -1,0 +1,67 @@
+---
+title: "Group1 HW Lab10"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: inline
+---
+
+The data set Walleye from the Minnesota Pollution Control Agency
+contains data on the lengths (inches) and weight (pounds) measurements for a sample of 60 walleye caught in Minnesota lakes during the 1990’s (B. Monson, private communication). There is some suspicion that on average, walleye are smaller now than in the past (due to overfishing). Suppose historical records from the early 1900s indicate that the average weight of walleye caught by fishermen was 2.5 lb. Assume the data are representative of caught walleye; do they indicate that walleye from the 1990s weigh less? 
+
+a) Create a histogram and quantile normal plot of the data, and describe
+the distribution
+```{r}
+library(resampledata3)
+data("Walleye")
+hist(Walleye$Weight)
+qqnorm(Walleye$Weight)
+qqline(Walleye$Weight)
+
+```
+The distribution is sqewed to the right and it is not normal. 
+
+c) If, instead, you use the formula t-test, would you reach the same conclusion?
+
+```{r}
+n=60
+s=sd(Walleye$Weight)
+x_bar=mean(Walleye$Weight)
+tstat.val=(x_bar-2.5)/(s/sqrt(n))
+pt(abs(tstat.val),n-1, lower.tail = FALSE) 
+
+```
+</br>
+
+**Hypothesis**
+
+> ho: mu >= `mu_null`
+
+> ha: mu < `mu_null`
+
+At significant level alpha = 0.05, the p-value is less than 0.5, we reject the null, which means walleyes are now smaller than before.
+
+For Arsenic data, test H0 : mu ≤ 100 versus HA : mu > 100. Is
+your test reliable?
+
+```{r}
+n = 271
+mu_null = 100
+xbar = mean(Bangladesh$Arsenic)
+sigma = sd(Bangladesh$Arsenic)
+t_stats = (xbar - mu_null)/(sigma/sqrt(n))
+p_value = pt(t_stats, 270, lower.tail = F)
+p_value
+```
+
+</br>
+
+**Hypothesis**
+
+> ho: mu <= `mu_null`
+
+> ha: mu > `mu_null`
+
+At significant level alpha = 0.05, the p-value is greater than 0.5, we support the null, which means the arsenic level in Bangladesh is now smaller than 100.

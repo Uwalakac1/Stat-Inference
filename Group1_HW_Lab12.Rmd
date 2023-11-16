@@ -1,0 +1,50 @@
+---
+title: "Group1_HW_Lab12"
+output:
+  word_document: default
+  html_notebook: default
+editor_options:
+  chunk_output_type: inline
+---
+
+Consider Verizon data. Use the classical t-test to determine
+whether the mean difference (Mean(ILEC)- Mean(CLEC) ) is
+signicantly greater than zero. Are the assumptions met? Are
+the population/true variances equal? Interpret the results.
+```{r}
+library(resampledata)
+data("Verizon")
+
+# head(Verizon)
+
+dat=Verizon
+
+ILEC=dat[dat$Group=="ILEC", ]
+ILEC=ILEC$Time
+CLEC=dat[dat$Group=="CLEC", ]
+CLEC=CLEC$Time
+
+#checking normality
+qqnorm(ILEC)
+qqline(ILEC)
+
+qqnorm(CLEC)
+qqline(CLEC)
+
+t.test(Time~Group, data = Verizon, alt = "two.sided",var.equal = TRUE)
+
+#OR
+
+#TESTING EQUALITY OF VARIANCES
+library(testequavar)
+equa2vartest(ILEC, CLEC, 0.05, B=5000)
+
+var(ILEC)
+var(CLEC)
+
+t.test(ILEC,CLEC, alt = "two.sided",var.equal = TRUE)
+
+
+
+```
+Since the pvalue is less than $\alpha$ we reject the null hypothesis that the true mean difference in repair times is significantly greater than zero.

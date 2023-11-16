@@ -1,0 +1,93 @@
+---
+title: "Group1_HW_Lab7"
+output:
+  pdf_document: default
+  html_notebook: default
+editor_options:
+  chunk_output_type: inline
+---
+
+ Simulate a 90% coverage probability of the normal-based CI
+(with unknown population variance) using n = 7 data points
+from N(1, 2) distribution. Does your coverage probability.
+```{r}
+tooLow <- 0           #set counter to 0
+tooHigh <- 0          #sest counter to 0
+n <- 7               # sample size
+N <- 10^5
+for (i in 1:N)
+ {
+  x<-rnorm(n,1,2)
+  #x <- rgamma(n, shape=5, rate=2)
+  #hist(x)
+  xbar <- mean(x)
+  s <- sd(x)
+  lower <- xbar - abs(qt(.05, n-1))*s/sqrt(n)
+  upper <- xbar + abs(qt(.05, n-1))*s/sqrt(n)
+  if (upper < 1) tooLow <- tooLow + 1
+  if (lower > 1) tooHigh <- tooHigh + 1
+ }
+tooLow/N
+tooHigh/N
+
+
+```
+90% confidence that the coverage probability is  .04943 on the left side and .4967 on the right when the data is normally distributed.
+
+
+Simulate a 90% coverage probability of the normal-based CI
+(with unknown population variance) using n = 5 data points
+from rcauchy(n, location=1, scale=2). Does your coverage probability
+match the confidence level? Why or why not? Repeat for
+n = 30 and ompare results. Interpret.
+
+```{r}
+set.seed(1)
+tooLow <- 0           #set counter to 0
+tooHigh <- 0          #sest counter to 0
+n <- 5               # sample size
+N <- 10^5
+for (i in 1:N)
+ {
+  x<-rexp(n,2/5)
+  #x<-rcauchy(n,1,2)
+  #x <- rgamma(n, shape=5, rate=2)
+  # hist(x)  DANGER!!!!!!!!!!! DO NOT UNCOMENT!!!!
+  xbar <- mean(x)
+  s <- sd(x)
+  lower <- xbar - abs(qt(.05, n-1))*s/sqrt(n)
+  upper <- xbar + abs(qt(.05, n-1))*s/sqrt(n)
+  if (upper < 2/5) tooLow <- tooLow + 1
+  if (lower > 2/5) tooHigh <- tooHigh + 1
+ }
+tooLow/N
+tooHigh/N
+
+
+```
+For a sample size of 5, I am 90% confidence that the coverage probability is .00011 on the left and .50257 on the right when the data is exponentially distributed.
+
+
+```{r}
+set.seed(1)
+tooLow <- 0           #set counter to 0
+tooHigh <- 0          #sest counter to 0
+n <- 30               # sample size
+N <- 10^5
+for (i in 1:N)
+ {
+  x<-rexp(n,30/2)
+  #x<-rcauchy(n,1,2)
+  #x <- rgamma(n, shape=5, rate=2)
+  #hist(x)
+  xbar <- mean(x)
+  s <- sd(x)
+  lower <- xbar - abs(qt(.05, n-1))*s/sqrt(n)
+  upper <- xbar + abs(qt(.05, n-1))*s/sqrt(n)
+  if (upper < 2/30) tooLow <- tooLow + 1
+  if (lower > 2/30) tooHigh <- tooHigh + 1
+ }
+tooLow/N
+tooHigh/N
+```
+For a sample size of 30, I am 90% confidence that the coverage probability is 0.09818 on the left and 0.02376 on the right when the data is exponentially distributed.

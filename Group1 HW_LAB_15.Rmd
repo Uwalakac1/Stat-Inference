@@ -1,0 +1,111 @@
+---
+title: "Group1 HW/LAB 15"
+output:
+  word_document: default
+  html_notebook: default
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r}
+set.seed(2021)
+#install.packages("resampledata3")
+library(resampledata3)
+data("Spruce")
+
+```
+
+
+
+From Example 9.3 (Black Spruce Seedlings), is the intercept
+significantly zero? Plot the estimated sampling distribution of
+the intercept. Is it normal? Comment. Calculate a 95%
+prediction interval for the “Di.change” when the “Ht.change” is
+32.1. Is there a significant association (linear) between
+Ht.change and Di.change ? Intepret the mean bootstrapped
+slope in the context of the problem
+
+```{r}
+spruce.lm <- lm(Di.change ~ Ht.change, data = Spruce)
+summary(spruce.lm)
+
+
+#Diagnostics:Independence of Residuals? constant variance?
+plot(spruce.lm$fit, rstudent(spruce.lm), ylab = "residuals")
+abline(h = 0)
+lines(smooth.spline(spruce.lm$fit, rstudent(spruce.lm), df = 3), col = "blue")
+
+#Diagnostics: Normality of residuals?
+qqnorm(rstudent(spruce.lm))
+qqline(rstudent(spruce.lm))
+
+
+
+```
+
+
+
+
+```{r}
+N <- 10^4
+b.boot <- numeric(N)
+a.boot <- numeric(N)
+yPred.boot <- numeric(N)
+n <- 72       #number of Spruces
+for (i in 1:N)
+ {
+  index <- sample(n, replace = TRUE)    #sample f rom 1, 2, ... n
+  Spruce.boot <- Spruce[index, ]
+
+  #recalculate linear model estimates
+  SpruceBoot.lm <- lm(Di.change ~ Ht.change, data = Spruce.boot)
+  a.boot[i] <- coef(SpruceBoot.lm)[1]
+  b.boot[i] <- coef(SpruceBoot.lm)[2]    # new slope
+  yPred.boot[i] <- a.boot[i] + 32.1 * b.boot[i]  #recompute Y^ at x=32.1
+  }
+
+#slope analysis and testing slope
+  mean(a.boot)
+  sd(a.boot)
+  quantile(a.boot, c(0.025, 0.975))
+
+  hist(a.boot, main = "Bootstrap distribuiton of beta_hat",
+      xlab = "beta_hat")
+  observed <- cor(Spruce$Ht.change, Spruce$Di.change)
+  abline(v = observed, col = "blue")    #add line at observed cor.
+
+  #95% prediction interval
+  summary(yPred.boot)
+  quantile(yPred.boot, c(0.025, 0.975))
+  
+  #########
+
+
+```
+```{r}
+plot(Spruce$Ht.change, Spruce$Di.change)
+
+```
+
+
+
+
+
+From the output of our code, we can say that the intercept is not significantly zero because the interval for true mean intercept [-1.00628729 -0.06059875] contains zero. 
+
+According to the residuals’ normality qq plot, the residuals is clearly not normal. So the assumption on Normality of the residuals is not valid, then the linear model is not reliable.
+
+We are  95% confident that the Di.change falls on the interval [3.981664, 4.352714] when Ht.change is 32.1. 
+There is a significant linear association between Ht.change and Dt.change because the interval [3.981664, 4.352714] calculated from yPred does not contain zero. 
+
+If the mean slope is positive, it suggests that as Ht.change increases, Di.change tends to increase on average. If negative, it suggests a decrease. When the mean of the bootstrapped slope does not change (Ht.change), the starting value for the plant growth is the mean intercept (Dt.change). 
+
+
+
+
+
+
+
+
+
+
